@@ -1,0 +1,5 @@
+pytest
+coverage
+black
+pylint
+pre-commit
