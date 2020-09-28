@@ -1,0 +1,1 @@
+from kinfit import settings
