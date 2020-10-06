@@ -6,7 +6,7 @@ setup(
     author="Maximilian Welsch",
     author_email="maxwelsch93@gmail.com",
     python_requires=">=3.6",
-    name="kinfit",
+    name="inclusivekinematicfit",
     packages=find_packages(),
     description="Inclusive Kinematic Fit provides code to kinematically fit the four momenta of the tag-side B meson, the signal lepton and the inclusive X system in inclusive semi-leptonic B decays ast e+e- B factories like Belle II.",
     install_requires=requirements,

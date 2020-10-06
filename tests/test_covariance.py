@@ -1,7 +1,10 @@
 import pytest
 import numpy as np
 
-from kinfit.covariance import number_of_off_diagonal_values, create_symmetric_matrix
+from inclusivekinematicfit.covariance import (
+    number_of_off_diagonal_values,
+    create_symmetric_matrix,
+)
 
 
 @pytest.mark.parametrize("test_input,expected", [(2, 1), (3, 3), (4, 6)])
