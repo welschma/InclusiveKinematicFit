@@ -1,6 +1,13 @@
+import os
 from setuptools import find_packages, setup
 
-requirements = ["numba", "numpy", "scipy", "pandas"]
+
+package_dir = os.path.dirname(os.path.abspath(__file__))
+requirements_file = os.path.join(package_dir, "requirements.txt")
+with open(requirements_file, "r") as rf:
+    requirements = [
+        req.strip() for req in rf.readlines() if req.strip() and not req.startswith("#")
+    ]
 
 setup(
     author="Maximilian Welsch",
