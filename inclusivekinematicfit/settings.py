@@ -7,6 +7,8 @@ from typing import Any, Dict
 # the global object hosting the current settings
 _kinfit_global_settings = {}  # type: Dict[str, Any]
 
+__all__ = ["get_setting", "set_setting"]
+
 
 def get_setting(key: str) -> Any:
     """Returns the value of the setting specified by `key`.
