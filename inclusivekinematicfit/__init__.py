@@ -3,3 +3,5 @@ from inclusivekinematicfit import covariance
 from inclusivekinematicfit import funclib
 from inclusivekinematicfit import chi2functions
 from inclusivekinematicfit import utility
+
+from inclusivekinematicfit.chi2functions import minimize

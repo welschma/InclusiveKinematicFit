@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any
+from enum import Enum
 
 import numpy as np
 
-from scipy.optimize import minimize, OptimizeResult
+import scipy.optimize
 
 from inclusivekinematicfit import funclib
 from inclusivekinematicfit.utility import (
@@ -11,6 +12,10 @@ from inclusivekinematicfit.utility import (
     MassiveParticleKinematicInfo,
     MasslessParticleKinematicInfo,
 )
+
+
+class Minimizer(Enum):
+    SCIPY_SLSQP = "scipy_slsqp"
 
 
 class AbstractKinematicFitCostFunction(ABC):
@@ -24,12 +29,51 @@ class AbstractKinematicFitCostFunction(ABC):
     def constraints(self):
         pass
 
+    @property
+    @abstractmethod
+    def minimizer(self):
+        pass
+
     @abstractmethod
     def __call__(self, x: np.ndarray):
         pass
 
 
-class KinematicFitCostFunction(AbstractKinematicFitCostFunction):
+class SLSQPKinematicFitCostFunction(AbstractKinematicFitCostFunction):
+    def __init__(self):
+        self._scipy_slsqp_settings = {"ftol": 1e-12, "disp": False, "maxiter": 1000}
+
+    @property
+    def minimizer(self):
+        return Minimizer.SCIPY_SLSQP
+
+    @property
+    def scipy_slsqp_settings(self):
+        return self._scipy_slsqp_settings
+
+    @scipy_slsqp_settings.setter
+    def scipy_slsqp_settings(self, new_settings: Dict[str, Any]):
+        valid_slsqp_settings = {
+            "ftol": float,
+            "eps": float,
+            "disp": bool,
+            "maxiter": int,
+        }
+
+        for slsqp_setting, setting in new_settings.items():
+            try:
+                valid_setting_type = valid_slsqp_settings[slsqp_setting]
+                if valid_setting_type != type(setting):
+                    raise ValueError(
+                        f"SLSQP setting {slsqp_setting} has to be of type {valid_setting_type}"
+                    )
+            except KeyError as exc:
+                raise ValueError(f"Unknow SLSQP setting {slsqp_setting}.") from exc
+
+        self._scipy_slsqp_settings = new_settings
+
+
+class DefaultKinematicFitCostFunction(SLSQPKinematicFitCostFunction):
     n_free_params = 11
     n_constrained_params = 3
     n_fit_params = n_free_params + n_constrained_params
@@ -42,7 +86,7 @@ class KinematicFitCostFunction(AbstractKinematicFitCostFunction):
         missing_mom_info: MasslessParticleKinematicInfo,
         beam_four_momentum: np.ndarray,
     ):
-
+        super().__init__()
         self.tag_side_measured_momentum = tag_side_info.four_momentum
         self.tag_side_cov = tag_side_info.covariance_matrix
 
@@ -141,14 +185,23 @@ class KinematicFitCostFunction(AbstractKinematicFitCostFunction):
         )
 
 
+def minimize(cost_function: AbstractKinematicFitCostFunction):
+
+    if cost_function.minimizer == Minimizer.SCIPY_SLSQP:
+        return minimize_with_slsqp(cost_function)
+    else:
+        raise ValueError(
+            f"Cost Function has unknown minimizer type: {cost_function.minimizer}"
+        )
+
+
 def minimize_with_slsqp(
-    cost_function: AbstractKinematicFitCostFunction,
-    slsqp_options: Dict[str, Any] = {"ftol": 1e-12, "disp": False, "maxiter": 1000},
-) -> OptimizeResult:
-    return minimize(
+    cost_function: SLSQPKinematicFitCostFunction,
+) -> scipy.optimize.OptimizeResult:
+    return scipy.optimize.minimize(
         fun=cost_function,
         x0=cost_function.initial_params,
         method="SLSQP",
         constraints=cost_function.constraints,
-        options=slsqp_options,
+        options=cost_function.scipy_slsqp_settings,
     )
