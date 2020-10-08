@@ -1,7 +1,7 @@
 from typing import NamedTuple
 
 import numpy as np
-import scipy
+import scipy.stats
 
 __all__ = [
     "MassiveParticleKinematicInfo",
