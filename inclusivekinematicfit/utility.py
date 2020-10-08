@@ -1,12 +1,14 @@
 from typing import NamedTuple
 
 import numpy as np
+import scipy
 
 __all__ = [
     "MassiveParticleKinematicInfo",
     "MassConstrainedParticleKinematicInfo",
     "MasslessParticleKinematicInfo",
     "rms",
+    "calculate_chi2_prob",
 ]
 
 
@@ -32,3 +34,19 @@ def rms(x: np.ndarray):
     for resolution distributions.
     """
     return np.sqrt(np.mean(np.square(x)))
+
+
+def calculate_chi2_prob(chi2_values: np.ndarray, ndf: int) -> np.ndarray:
+    """Calculates the p-value of the given chi square
+    value assuming an chi square distribution with
+    `ndf` degrees of freedom.
+
+    :param chi2_values: Input chi square values
+    :type chi2_values: np.ndarray
+    :param ndf: Number of degrees of freedom for the
+    chi square distribution
+    :type ndf: int
+    :return: Calculated p-values
+    :rtype: np.ndarray
+    """
+    return 1 - scipy.stats.chi2.cdf(chi2_values, df=ndf)
