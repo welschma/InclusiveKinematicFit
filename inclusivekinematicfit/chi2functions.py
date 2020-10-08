@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Dict, Any, Union
 from enum import Enum
 
 import numpy as np
@@ -68,7 +68,7 @@ class SLSQPKinematicFitCostFunction(AbstractKinematicFitCostFunction):
                         f"SLSQP setting {slsqp_setting} has to be of type {valid_setting_type}"
                     )
             except KeyError as exc:
-                raise ValueError(f"Unknow SLSQP setting {slsqp_setting}.") from exc
+                raise ValueError(f"Unknown SLSQP setting {slsqp_setting}.") from exc
 
         self._scipy_slsqp_settings = new_settings
 
@@ -185,7 +185,9 @@ class DefaultKinematicFitCostFunction(SLSQPKinematicFitCostFunction):
         )
 
 
-def minimize(cost_function: AbstractKinematicFitCostFunction):
+def minimize(
+    cost_function: AbstractKinematicFitCostFunction
+) -> Union[SLSQPKinematicFitCostFunction]:
 
     if cost_function.minimizer == Minimizer.SCIPY_SLSQP:
         return minimize_with_slsqp(cost_function)
