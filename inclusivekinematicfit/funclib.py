@@ -4,8 +4,8 @@ sum and constraints used to fit the different particle four momenta.
 All functions expect as first argument the parameter array used for the minimization.
 In total, there are 14 parameters (the parameter array is expected to follow this
 convetion):
-    - x[0:4] 4 four momenta componets of the tag side B meson, x[0:3] are the momenta while x[4] is the energy
-    - x[4:8] 4 four momenta componets of the x system, x[0:3] are the momenta while x[4] is the energy
+    - x[0:4] 4 four momenta componets of the tag side B meson, x[0:2] are the momenta while x[3] is the energy
+    - x[4:8] 4 four momenta componets of the x system, x[4:6] are the momenta while x[7] is the energy
     - x[8:11] 3 three momenta componets of the lepton
     - x[11:14] 3 three momenta componets of the neutrino
 """
@@ -28,8 +28,12 @@ __all__ = [
     "_eq_mass_function",
     "_tag_mass_function",
     "_sig_mass_function",
+    "_x_mass_function",
     "_objective_function",
 ]
+
+
+AVG_B_MASS = 5.279
 
 
 @numba.jit(nopython=True)
@@ -216,12 +220,17 @@ def _eq_mass_function(x: np.ndarray, lepton_mass: float) -> float:
 
 @numba.jit(nopython=True)
 def _tag_mass_function(x: np.ndarray) -> float:
-    return np.sqrt(_tag_mass_sq(x)) - 5.279
+    return np.sqrt(_tag_mass_sq(x)) - AVG_B_MASS
 
 
 @numba.jit(nopython=True)
 def _sig_mass_function(x: np.ndarray, lepton_mass: float) -> float:
-    return np.sqrt(_sig_mass_sq(x, lepton_mass)) - 5.279
+    return np.sqrt(_sig_mass_sq(x, lepton_mass)) - AVG_B_MASS
+
+
+@numba.jit(nopython=True)
+def _x_mass_function(x: np.ndarray) -> float:
+    return x[7] ** 2 - np.sum(x[4:7] ** 2)
 
 
 @numba.jit(nopython=True)

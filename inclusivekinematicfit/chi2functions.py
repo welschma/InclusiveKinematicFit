@@ -41,7 +41,7 @@ class AbstractKinematicFitCostFunction(ABC):
 
 class SLSQPKinematicFitCostFunction(AbstractKinematicFitCostFunction):
     def __init__(self):
-        self._scipy_slsqp_settings = {"ftol": 1e-12, "disp": False, "maxiter": 1000}
+        self._scipy_slsqp_settings = {"ftol": 1e-9, "disp": False, "maxiter": 500}
 
     @property
     def minimizer(self):
@@ -133,6 +133,9 @@ class DefaultKinematicFitCostFunction(SLSQPKinematicFitCostFunction):
     def sig_mass_cons(self, x: np.ndarray):
         return funclib._sig_mass_function(x, self.lepton_mass)
 
+    def x_mass_cons(self, x: np.ndarray) -> float:
+        return funclib._x_mass_function(x)
+
     @property
     def initial_params(self):
         initial_params = np.array(
@@ -170,7 +173,18 @@ class DefaultKinematicFitCostFunction(SLSQPKinematicFitCostFunction):
 
         sig_mass_cons = {"type": "eq", "fun": self.sig_mass_cons}
 
-        return [x_mom_cons, y_mom_cons, z_mom_cons, energy_cons, equal_mass_cons]
+        x_mass_cons = {"type": "ineq", "fun": self.x_mass_cons}
+
+        return [
+            x_mom_cons,
+            y_mom_cons,
+            z_mom_cons,
+            energy_cons,
+            equal_mass_cons,
+            # tag_mass_cons,
+            # sig_mass_cons,
+            x_mass_cons,
+        ]
 
     def __call__(self, x: np.ndarray):
         return funclib._objective_function(
@@ -186,7 +200,7 @@ class DefaultKinematicFitCostFunction(SLSQPKinematicFitCostFunction):
 
 
 def minimize(
-    cost_function: AbstractKinematicFitCostFunction
+    cost_function: AbstractKinematicFitCostFunction,
 ) -> Union[SLSQPKinematicFitCostFunction]:
 
     if cost_function.minimizer == Minimizer.SCIPY_SLSQP:
