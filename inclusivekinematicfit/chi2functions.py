@@ -180,9 +180,9 @@ class DefaultKinematicFitCostFunction(SLSQPKinematicFitCostFunction):
             y_mom_cons,
             z_mom_cons,
             energy_cons,
-            equal_mass_cons,
-            # tag_mass_cons,
-            # sig_mass_cons,
+            # equal_mass_cons,
+            tag_mass_cons,
+            sig_mass_cons,
             x_mass_cons,
         ]
 
