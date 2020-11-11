@@ -11,7 +11,7 @@ from inclusivekinematicfit.utility import rms
 __all__ = [
     "number_of_off_diagonal_values",
     "create_symmetric_matrix",
-    "get_x_covariance_by_phase_space",
+    "get_covariance_by_phase_space",
     "get_rms_diag_error_matrix",
     "get_rms_error_matrix",
     "get_gaussian_cov_matrix",
@@ -69,7 +69,7 @@ def create_symmetric_matrix(
     return m
 
 
-def get_x_covariance_by_phase_space(
+def get_covariance_by_phase_space(
     df: pd.DataFrame,
     phase_space_bin_columns: List[str],
     cov_mat_estimator: Callable[[pd.DataFrame], np.ndarray],
