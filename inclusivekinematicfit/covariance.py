@@ -97,8 +97,11 @@ def get_rms_diag_error_matrix(
 def get_rms_error_matrix(
     df: pd.DataFrame, four_momentum_columns: List[str]
 ) -> np.ndarray:
+
     diag_rms = np.sqrt((get_rms_diag_error_matrix(df, four_momentum_columns)))
+
     correlation = np.corrcoef(df.loc[:, four_momentum_columns], rowvar=False)
+
     return diag_rms @ correlation @ diag_rms
 
 

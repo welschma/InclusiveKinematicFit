@@ -21,4 +21,4 @@ pytest == 6.1.0
 scipy == 1.4.1
 
 # InclusiveKinematicFit/setup.py: 1
-setuptools == 46.1.3
+setuptools
