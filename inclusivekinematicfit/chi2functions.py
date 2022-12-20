@@ -85,6 +85,7 @@ class DefaultKinematicFitCostFunction(SLSQPKinematicFitCostFunction):
         x_system_info: MassiveParticleKinematicInfo,
         missing_mom_info: MasslessParticleKinematicInfo,
         beam_four_momentum: np.ndarray,
+        constraint_list=["px", "py", "pz", "E", "mbsig", "mbtag", "mx2"],
     ):
         super().__init__()
         self.tag_side_measured_momentum = tag_side_info.four_momentum
@@ -111,6 +112,7 @@ class DefaultKinematicFitCostFunction(SLSQPKinematicFitCostFunction):
         self.neutrino_measured_three_momentum = missing_mom_info.three_momentum
 
         self.beam_four_momentum = beam_four_momentum
+        self.constraint_list = constraint_list
 
     def x_mom_cons(self, x: np.ndarray):
         return funclib._x_mom_function(x, self.beam_four_momentum)
@@ -159,31 +161,19 @@ class DefaultKinematicFitCostFunction(SLSQPKinematicFitCostFunction):
     @property
     def constraints(self):
 
-        x_mom_cons = {"type": "eq", "fun": self.x_mom_cons}
-
-        y_mom_cons = {"type": "eq", "fun": self.y_mom_cons}
-
-        z_mom_cons = {"type": "eq", "fun": self.z_mom_cons}
-
-        energy_cons = {"type": "eq", "fun": self.E_cons}
-
-        equal_mass_cons = {"type": "eq", "fun": self.eq_mass_cons}
-
-        tag_mass_cons = {"type": "eq", "fun": self.tag_mass_cons}
-
-        sig_mass_cons = {"type": "eq", "fun": self.sig_mass_cons}
-
-        x_mass_cons = {"type": "ineq", "fun": self.x_mass_cons}
+        constraint_dict = {
+            "px": {"type": "eq", "fun": self.x_mom_cons},
+            "py": {"type": "eq", "fun": self.y_mom_cons},
+            "pz": {"type": "eq", "fun": self.z_mom_cons},
+            "E": {"type": "eq", "fun": self.E_cons},
+            "mbequal": {"type": "eq", "fun": self.eq_mass_cons},
+            "mbtag": {"type": "eq", "fun": self.tag_mass_cons},
+            "mbsig": {"type": "eq", "fun": self.sig_mass_cons},
+            "mx2": {"type": "ineq", "fun": self.x_mass_cons},
+        }
 
         return [
-            x_mom_cons,
-            y_mom_cons,
-            z_mom_cons,
-            energy_cons,
-            # equal_mass_cons,
-            tag_mass_cons,
-            sig_mass_cons,
-            x_mass_cons,
+            constraint_dict[constraint_name] for constraint_name in self.constraint_list
         ]
 
     def __call__(self, x: np.ndarray):
@@ -199,9 +189,7 @@ class DefaultKinematicFitCostFunction(SLSQPKinematicFitCostFunction):
         )
 
 
-def minimize(
-    cost_function: AbstractKinematicFitCostFunction,
-) -> Union[SLSQPKinematicFitCostFunction]:
+def minimize(cost_function: AbstractKinematicFitCostFunction,):
 
     if cost_function.minimizer == Minimizer.SCIPY_SLSQP:
         return minimize_with_slsqp(cost_function)
